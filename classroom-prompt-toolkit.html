@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Classroom Prompt Toolkit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#EEF1EA;
+    --surface:#FFFFFF;
+    --ink:#232821;
+    --ink-soft:#5B6259;
+    --pine:#2E5C4C;
+    --pine-deep:#20443A;
+    --gold:#C4882C;
+    --line:#D9DBCF;
+    --line-soft:#E6E8DF;
+    --danger:#9A3B2E;
+    --radius:3px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif;
+    font-size:15px;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.serif{font-family:'Fraunces',serif;}
+  a{color:inherit;}
+  button{font-family:inherit;}
+
+  ::selection{background:var(--gold);color:#fff;}
+
+  /* ---------- Shell layout ---------- */
+  .shell{display:flex;min-height:100vh;}
+
+  .rail{
+    width:230px;
+    flex-shrink:0;
+    background:var(--pine-deep);
+    color:#EAF1EC;
+    display:flex;
+    flex-direction:column;
+    padding:28px 0 20px;
+    position:sticky;
+    top:0;
+    height:100vh;
+  }
+  .rail-brand{
+    padding:0 22px 22px;
+    border-bottom:1px solid rgba(234,241,236,0.15);
+    margin-bottom:10px;
+  }
+  .rail-brand .mark{
+    font-family:'Fraunces',serif;
+    font-size:1.28rem;
+    font-weight:600;
+    letter-spacing:-0.01em;
+    line-height:1.15;
+  }
+  .rail-brand .sub{
+    font-size:0.74rem;
+    color:#9FC2AF;
+    margin-top:6px;
+    line-height:1.4;
+  }
+  .rail-nav{flex:1;padding:10px 10px;}
+  .rail-btn{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    width:100%;
+    text-align:left;
+    background:none;
+    border:none;
+    color:#CFE0D5;
+    padding:11px 12px;
+    font-size:0.87rem;
+    font-weight:500;
+    border-radius:var(--radius);
+    cursor:pointer;
+    margin-bottom:2px;
+    transition:background .12s ease, color .12s ease;
+    border-left:3px solid transparent;
+  }
+  .rail-btn .num{
+    font-size:0.72rem;
+    color:#7FA593;
+    font-variant-numeric:tabular-nums;
+    width:16px;
+  }
+  .rail-btn:hover{background:rgba(234,241,236,0.08); color:#fff;}
+  .rail-btn.active{
+    background:rgba(234,241,236,0.1);
+    color:#fff;
+    border-left:3px solid var(--gold);
+  }
+  .rail-btn.active .num{color:var(--gold);}
+  .rail-foot{
+    padding:14px 22px 0;
+    font-size:0.72rem;
+    color:#6F9483;
+    border-top:1px solid rgba(234,241,236,0.15);
+  }
+
+  .mobile-tabs{display:none;}
+
+  main{
+    flex:1;
+    min-width:0;
+    padding:52px 56px 90px;
+    max-width:1180px;
+  }
+  .view{display:none;}
+  .view.active{display:block;}
+
+  .eyebrow{
+    font-size:0.78rem;
+    color:var(--pine);
+    font-weight:600;
+    margin-bottom:10px;
+  }
+  h1.page-title{
+    font-size:2.3rem;
+    font-weight:600;
+    letter-spacing:-0.01em;
+    margin:0 0 14px;
+    max-width:16ch;
+  }
+  .lede{
+    font-size:1.02rem;
+    color:var(--ink-soft);
+    max-width:56ch;
+    margin-bottom:0;
+  }
+
+  /* ---------- Home ---------- */
+  .home-hero{
+    display:flex;
+    gap:60px;
+    padding-bottom:44px;
+    margin-bottom:44px;
+    border-bottom:1px solid var(--line);
+    flex-wrap:wrap;
+  }
+  .home-hero .left{flex:1;min-width:280px;}
+  .home-hero .right{
+    width:300px;
+    background:var(--surface);
+    border:1px solid var(--line);
+    padding:22px 24px;
+  }
+  .home-hero .right h3{margin:0 0 12px;font-size:1rem;font-weight:600;}
+  .home-hero .right ul{margin:0;padding-left:18px;font-size:0.88rem;color:var(--ink-soft);}
+  .home-hero .right li{margin-bottom:8px;}
+  .cta-row{margin-top:26px;display:flex;gap:12px;flex-wrap:wrap;}
+  .btn-primary{
+    background:var(--pine);
+    color:#fff;
+    border:none;
+    padding:12px 20px;
+    font-size:0.9rem;
+    font-weight:600;
+    cursor:pointer;
+    border-radius:var(--radius);
+  }
+  .btn-primary:hover{background:var(--pine-deep);}
+  .btn-ghost{
+    background:none;
+    border:1px solid var(--line);
+    color:var(--ink);
+    padding:12px 20px;
+    font-size:0.9rem;
+    font-weight:600;
+    cursor:pointer;
+    border-radius:var(--radius);
+  }
+  .btn-ghost:hover{border-color:var(--pine);}
+
+  .flow{
+    display:flex;
+    gap:0;
+    margin:36px 0 10px;
+    overflow-x:auto;
+    padding-bottom:6px;
+  }
+  .flow-step{
+    flex:1;
+    min-width:132px;
+    padding:16px 18px 16px 0;
+    position:relative;
+  }
+  .flow-step:not(:last-child)::after{
+    content:"";
+    position:absolute;
+    right:0;
+    top:26px;
+    width:1px;
+    height:24px;
+    background:var(--line);
+  }
+  .flow-step .n{
+    font-family:'Fraunces',serif;
+    font-size:1.3rem;
+    color:var(--gold);
+    display:block;
+    margin-bottom:6px;
+  }
+  .flow-step .t{font-size:0.85rem;font-weight:600;margin-bottom:4px;}
+  .flow-step .d{font-size:0.79rem;color:var(--ink-soft);}
+
+  .cares-block{margin-top:44px;}
+  .cares-table{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--line);}
+  .cares-table th,.cares-table td{text-align:left;padding:14px 18px;border-bottom:1px solid var(--line-soft);font-size:0.85rem;vertical-align:top;}
+  .cares-table th{background:#F5F5EF;font-size:0.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft);}
+  .cares-table td:first-child{width:220px;color:var(--pine-deep);}
+  .cares-table tr:last-child td{border-bottom:none;}
+
+  .principle-box{
+    margin-top:40px;
+    padding:22px 26px;
+    background:var(--surface);
+    border-left:3px solid var(--gold);
+  }
+  .principle-box p{margin:0;font-size:0.95rem;color:var(--ink-soft);}
+  .principle-box p + p{margin-top:10px;}
+
+  /* ---------- Builder ---------- */
+  .builder-wrap{display:flex;gap:36px;align-items:flex-start;}
+  .builder-form{flex:1;min-width:0;max-width:520px;}
+  .builder-out{
+    flex:1;
+    min-width:0;
+    position:sticky;
+    top:52px;
+  }
+
+  .mode-row{display:flex;gap:8px;flex-wrap:wrap;margin:22px 0 30px;}
+  .mode-chip{
+    background:var(--surface);
+    border:1px solid var(--line);
+    padding:9px 15px;
+    font-size:0.83rem;
+    font-weight:500;
+    color:var(--ink-soft);
+    border-radius:20px;
+    cursor:pointer;
+  }
+  .mode-chip.active{
+    background:var(--pine);
+    border-color:var(--pine);
+    color:#fff;
+  }
+
+  .field-group{margin-bottom:26px;}
+  .field-group > .fg-title{
+    font-size:0.72rem;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+    color:var(--ink-soft);
+    margin-bottom:12px;
+    font-weight:600;
+  }
+  .field{margin-bottom:16px;}
+  .field label{
+    display:block;
+    font-size:0.85rem;
+    font-weight:500;
+    margin-bottom:6px;
+  }
+  .field .hint{font-size:0.76rem;color:var(--ink-soft);margin-top:4px;}
+  .field input[type=text],
+  .field input[type=number],
+  .field select,
+  .field textarea{
+    width:100%;
+    padding:9px 11px;
+    font-size:0.87rem;
+    font-family:inherit;
+    border:1px solid var(--line);
+    background:var(--surface);
+    border-radius:var(--radius);
+    color:var(--ink);
+  }
+  .field textarea{resize:vertical;min-height:64px;}
+  .field input:focus,.field select:focus,.field textarea:focus{
+    outline:none;border-color:var(--pine);
+  }
+  .row2{display:flex;gap:14px;}
+  .row2 > div{flex:1;}
+
+  .slider-field .slider-head{
+    display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;
+  }
+  .slider-field .val{font-weight:600;color:var(--pine);font-size:0.85rem;}
+  input[type=range]{
+    width:100%;
+    accent-color:var(--pine);
+    height:4px;
+  }
+
+  .check-list{display:flex;flex-direction:column;gap:9px;}
+  .check-list label{
+    display:flex;align-items:flex-start;gap:9px;
+    font-size:0.84rem;font-weight:400;color:var(--ink);
+    cursor:pointer;
+  }
+  .check-list input{margin-top:3px;accent-color:var(--pine);}
+
+  .chip-toggle{display:flex;flex-wrap:wrap;gap:8px;}
+  .chip-toggle .opt{
+    border:1px solid var(--line);
+    background:var(--surface);
+    padding:7px 13px;
+    font-size:0.8rem;
+    border-radius:16px;
+    cursor:pointer;
+    color:var(--ink-soft);
+  }
+  .chip-toggle .opt.on{
+    background:var(--pine-deep);
+    border-color:var(--pine-deep);
+    color:#fff;
+  }
+
+  .out-card{
+    background:var(--pine-deep);
+    color:#EAF1EC;
+    border-radius:4px;
+    padding:22px 24px 20px;
+  }
+  .out-head{
+    display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;
+  }
+  .out-head span{font-size:0.78rem;color:#9FC2AF;font-weight:600;text-transform:uppercase;letter-spacing:.04em;}
+  .copy-btn{
+    background:var(--gold);
+    color:#241a06;
+    border:none;
+    padding:8px 15px;
+    font-size:0.8rem;
+    font-weight:700;
+    border-radius:3px;
+    cursor:pointer;
+  }
+  .copy-btn:hover{background:#D9993B;}
+  .copy-btn.copied{background:#7FA593;color:#0F251B;}
+  #promptOutput{
+    white-space:pre-wrap;
+    font-family:'SFMono-Regular',Consolas,monospace;
+    font-size:0.81rem;
+    line-height:1.65;
+    max-height:560px;
+    overflow-y:auto;
+    color:#F2F6F3;
+  }
+  .out-note{
+    font-size:0.78rem;
+    color:var(--ink-soft);
+    margin-top:14px;
+    max-width:34ch;
+  }
+
+  /* ---------- Library ---------- */
+  .lib-filters{display:flex;gap:8px;flex-wrap:wrap;margin:24px 0 8px;}
+  .lib-search{
+    margin:18px 0 22px;
+    max-width:360px;
+  }
+  .lib-search input{
+    width:100%;padding:10px 13px;font-size:0.87rem;
+    border:1px solid var(--line);background:var(--surface);border-radius:var(--radius);
+  }
+  .lib-search input:focus{outline:none;border-color:var(--pine);}
+
+  .lib-grid{display:flex;flex-direction:column;gap:1px;background:var(--line);border:1px solid var(--line);margin-top:8px;}
+  .lib-item{background:var(--surface);}
+  .lib-item-head{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:16px 20px;
+    cursor:pointer;
+    gap:16px;
+  }
+  .lib-item-head:hover{background:#FAFAF6;}
+  .lib-item-title{font-weight:600;font-size:0.93rem;}
+  .lib-item-cat{font-size:0.73rem;color:var(--pine);font-weight:600;margin-top:3px;text-transform:uppercase;letter-spacing:.03em;}
+  .lib-item-desc{font-size:0.82rem;color:var(--ink-soft);margin-top:5px;max-width:56ch;}
+  .lib-chevron{flex-shrink:0;color:var(--ink-soft);transition:transform .15s ease;font-size:1.1rem;}
+  .lib-item.open .lib-chevron{transform:rotate(180deg);}
+  .lib-item-body{display:none;padding:0 20px 20px;}
+  .lib-item.open .lib-item-body{display:block;}
+  .lib-prompt-box{
+    background:#F5F5EF;
+    border:1px solid var(--line);
+    padding:16px 18px;
+    font-family:'SFMono-Regular',Consolas,monospace;
+    font-size:0.79rem;
+    line-height:1.6;
+    white-space:pre-wrap;
+    color:var(--ink);
+    max-height:340px;
+    overflow-y:auto;
+  }
+  .lib-item-body .copy-btn{margin-top:12px;background:var(--pine);color:#fff;}
+  .lib-item-body .copy-btn.copied{background:#7FA593;color:#0F251B;}
+  .lib-item-body .copy-btn:hover{background:var(--pine-deep);}
+
+  /* ---------- Refine ---------- */
+  .refine-table{width:100%;border-collapse:collapse;margin:26px 0 40px;}
+  .refine-table th,.refine-table td{
+    text-align:left;padding:12px 16px;border-bottom:1px solid var(--line);font-size:0.85rem;vertical-align:top;
+  }
+  .refine-table th{font-size:0.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft);}
+  .refine-table td.phrase{color:var(--pine-deep);font-weight:500;font-style:italic;}
+
+  .template-block{margin-bottom:34px;}
+  .template-block h3{font-size:1.02rem;margin-bottom:6px;}
+  .template-block .desc{font-size:0.85rem;color:var(--ink-soft);margin-bottom:12px;max-width:60ch;}
+
+  /* ---------- Guardrails ---------- */
+  .g-cols{display:flex;gap:40px;flex-wrap:wrap;margin-top:10px;}
+  .g-col{flex:1;min-width:300px;}
+  .g-col h3{font-size:0.95rem;margin-bottom:14px;}
+  .g-list{list-style:none;padding:0;margin:0;}
+  .g-list li{
+    padding:11px 0 11px 22px;
+    border-bottom:1px solid var(--line-soft);
+    font-size:0.86rem;
+    color:var(--ink-soft);
+    position:relative;
+  }
+  .g-list li::before{
+    content:"—";
+    position:absolute;left:0;color:var(--gold);
+  }
+
+  .checklist-progress{
+    display:flex;align-items:center;gap:12px;margin:22px 0 8px;
+  }
+  .bar{flex:1;height:6px;background:var(--line);border-radius:3px;overflow:hidden;}
+  .bar-fill{height:100%;background:var(--pine);width:0%;transition:width .2s ease;}
+  .progress-label{font-size:0.8rem;color:var(--ink-soft);white-space:nowrap;}
+  .qa-list{list-style:none;padding:0;margin:14px 0 0;}
+  .qa-list li{border-bottom:1px solid var(--line-soft);}
+  .qa-list label{
+    display:flex;align-items:flex-start;gap:11px;padding:12px 2px;font-size:0.87rem;cursor:pointer;
+  }
+  .qa-list input{margin-top:3px;accent-color:var(--pine);}
+  .qa-list input:checked ~ span{color:var(--ink-soft);text-decoration:line-through;text-decoration-color:var(--line);}
+
+  @media (max-width: 880px){
+    .shell{flex-direction:column;}
+    .rail{display:none;}
+    .mobile-tabs{
+      display:flex;
+      overflow-x:auto;
+      background:var(--pine-deep);
+      position:sticky;top:0;z-index:10;
+      padding:10px 12px;
+      gap:6px;
+    }
+    .mobile-tabs button{
+      background:none;border:1px solid rgba(234,241,236,.3);color:#DCEAE1;
+      padding:8px 14px;font-size:0.8rem;border-radius:14px;white-space:nowrap;cursor:pointer;
+    }
+    .mobile-tabs button.active{background:var(--gold);border-color:var(--gold);color:#241a06;font-weight:600;}
+    main{padding:30px 20px 70px;}
+    .builder-wrap{flex-direction:column;}
+    .builder-out{position:static;width:100%;}
+    .home-hero{flex-direction:column;}
+    .home-hero .right{width:100%;}
+  }
+</style>
+</head>
+<body>
+
+<div class="mobile-tabs" id="mobileTabs"></div>
+
+<div class="shell">
+  <nav class="rail">
+    <div class="rail-brand">
+      <div class="mark">Classroom Prompt Toolkit</div>
+      <div class="sub">AI planning support for Nepal's teachers</div>
+    </div>
+    <div class="rail-nav" id="railNav"></div>
+    <div class="rail-foot">Works with Claude, ChatGPT, Gemini or any assistant you use.</div>
+  </nav>
+
+  <main>
+
+    <!-- HOME -->
+    <section class="view" id="view-home">
+      <div class="home-hero">
+        <div class="left">
+          <div class="eyebrow">Start here</div>
+          <h1 class="page-title">Plan the lesson.<br>Let AI carry the paperwork.</h1>
+          <p class="lede">A set of prompts and a builder tuned for real classrooms across Nepal — any subject, any grade, any board. Fill in your context once, and get a prompt worth asking an assistant.</p>
+          <div class="cta-row">
+            <button class="btn-primary" onclick="showView('builder')">Open the Prompt Builder</button>
+            <button class="btn-ghost" onclick="showView('library')">Browse the library</button>
+          </div>
+        </div>
+        <div class="right">
+          <h3>What this gives you</h3>
+          <ul>
+            <li>A prompt builder that writes complete, structured prompts from your inputs</li>
+            <li>A library of ready templates for slides, guides, activities and assessment</li>
+            <li>Follow-up phrases to fix a weak AI draft in one line</li>
+            <li>A pre-flight checklist before anything reaches a class</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="cares-block">
+        <div class="eyebrow">For high-stakes material</div>
+        <h2 class="serif" style="font-size:1.3rem;font-weight:600;margin:0 0 6px;">The C.A.R.E.S. lens</h2>
+        <p class="lede" style="font-size:0.9rem;margin-bottom:18px;">Use this whenever the output is going in front of a class tomorrow — it's the fuller version of what the Prompt Builder already does for you.</p>
+        <table class="cares-table">
+          <tr><th>Element</th><th>What to specify</th></tr>
+          <tr><td><strong>C</strong> — Context &amp; Objectives</td><td>Subject, exact grade, curriculum standard (CDC Nepal, Cambridge IGCSE, NEB…), lesson duration, prior knowledge.</td></tr>
+          <tr><td><strong>A</strong> — Audience &amp; Tone</td><td>Student background, language level, desired tone (encouraging, inquiry-driven, rigorous).</td></tr>
+          <tr><td><strong>R</strong> — Role &amp; Identity</td><td>Give the AI a persona: "Act as an experienced Grade 9 physics teacher and curriculum designer."</td></tr>
+          <tr><td><strong>E</strong> — Execution &amp; Structure</td><td>Exact layout: slide titles, bullet counts, table formats, speaker notes, markdown headers.</td></tr>
+          <tr><td><strong>S</strong> — Specific Constraints &amp; Safeguards</td><td>Explicit limits: max 3 bullets per slide, cap the vocabulary level, include 2 formative checks.</td></tr>
+        </table>
+        <p class="out-note" style="margin-top:14px;max-width:70ch;">Models drift over a long response — repeating a constraint in bold or capitals keeps them on track.</p>
+      </div>
+
+      <div class="eyebrow" style="margin-top:44px;">The workflow behind every prompt here</div>
+      <h2 class="serif" style="font-size:1.3rem;font-weight:600;margin:0 0 6px;">Nine steps, one direction of travel</h2>
+      <p class="lede" style="font-size:0.9rem;">AI drafts. You decide what's accurate, feasible, and right for your students.</p>
+
+      <div class="flow">
+        <div class="flow-step"><span class="n">01</span><div class="t">Define the lesson</div><div class="d">Grade, topic, outcomes, duration, prior knowledge.</div></div>
+        <div class="flow-step"><span class="n">02</span><div class="t">Build the architecture</div><div class="d">The learning journey, before any slide exists.</div></div>
+        <div class="flow-step"><span class="n">03</span><div class="t">Review it yourself</div><div class="d">Edit the sequence before generating anything else.</div></div>
+        <div class="flow-step"><span class="n">04</span><div class="t">Generate slides</div><div class="d">Student-facing, from the approved architecture.</div></div>
+        <div class="flow-step"><span class="n">05</span><div class="t">Generate a teacher guide</div><div class="d">What to say, ask, and do when it goes sideways.</div></div>
+        <div class="flow-step"><span class="n">06</span><div class="t">Build activities</div><div class="d">Only once the sequence is clear.</div></div>
+        <div class="flow-step"><span class="n">07</span><div class="t">Fact-check everything</div><div class="d">Numbers, science, claims, citations.</div></div>
+        <div class="flow-step"><span class="n">08</span><div class="t">Test it against reality</div><div class="d">Time, materials, class size, language, space.</div></div>
+        <div class="flow-step"><span class="n">09</span><div class="t">Teach from judgment</div><div class="d">The output is a draft, not a transcript.</div></div>
+      </div>
+
+      <div class="principle-box">
+        <p><strong>A simple test:</strong> if removing the AI would leave you unable to explain why the lesson works, it's gone too far.</p>
+        <p>If it helps you see more options and spend more time thinking about your students — it's doing its job.</p>
+      </div>
+    </section>
+
+    <!-- BUILDER -->
+    <section class="view" id="view-builder">
+      <div class="eyebrow">Prompt Builder</div>
+      <h1 class="page-title">Build your prompt</h1>
+      <p class="lede">Fill in your class context once. Switch modes for different outputs — the prompt updates as you type.</p>
+
+      <div class="mode-row" id="modeRow"></div>
+
+      <div class="builder-wrap">
+        <div class="builder-form" id="builderForm"></div>
+        <div class="builder-out">
+          <div class="out-card">
+            <div class="out-head">
+              <span id="outLabel">Your prompt</span>
+              <button class="copy-btn" id="copyBtn" onclick="copyPrompt()">Copy prompt</button>
+            </div>
+            <div id="promptOutput"></div>
+          </div>
+          <div class="out-note">Paste this into Claude, ChatGPT, Gemini or any assistant. Review everything it returns before it reaches a class — see the Guardrails tab.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LIBRARY -->
+    <section class="view" id="view-library">
+      <div class="eyebrow">Prompt Library</div>
+      <h1 class="page-title">Ready-made templates</h1>
+      <p class="lede">Copy any prompt, fill in the brackets, and paste it in as-is. Filter by what you're trying to produce.</p>
+
+      <div class="lib-search">
+        <input type="text" id="libSearch" placeholder="Search templates…" oninput="renderLibrary()">
+      </div>
+      <div class="lib-filters" id="libFilters"></div>
+      <div class="lib-grid" id="libGrid"></div>
+    </section>
+
+    <!-- REFINE -->
+    <section class="view" id="view-refine">
+      <div class="eyebrow">Refine &amp; Fact-Check</div>
+      <h1 class="page-title">When the first draft isn't right</h1>
+      <p class="lede">Don't start over — a short follow-up almost always works better than a new prompt.</p>
+
+      <table class="refine-table">
+        <tr><th>If the draft is…</th><th>Say this</th></tr>
+        <tr><td>Too generic or dry</td><td class="phrase">Rewrite using real-world analogies and a warmer, more engaging tone suitable for this grade.</td></tr>
+        <tr><td>Cluttered on slides</td><td class="phrase">Format into a maximum of 3 bullets per slide, 10 words each. Move explanations into speaker notes.</td></tr>
+        <tr><td>Too advanced</td><td class="phrase">Simplify to this grade's reading level. Replace jargon with student-friendly comparisons.</td></tr>
+        <tr><td>Too passive</td><td class="phrase">Insert three turn-and-talk pauses and one movement or hands-on check into the pacing.</td></tr>
+        <tr><td>Missing local relevance</td><td class="phrase">Replace the generic examples with local context — festivals, geography, trades, or everyday materials.</td></tr>
+        <tr><td>Too long for one slide</td><td class="phrase">Split this into two slides, or cut it to the three most essential points.</td></tr>
+      </table>
+
+      <div class="template-block">
+        <h3>Targeted revision</h3>
+        <div class="desc">Change only the part that's wrong — keep everything else untouched.</div>
+        <div class="lib-prompt-box" id="tplRevision"></div>
+        <button class="copy-btn" onclick="copyBlock('tplRevision', this)">Copy prompt</button>
+      </div>
+
+      <div class="template-block">
+        <h3>Lesson auditor</h3>
+        <div class="desc">A strict, constructive second opinion on a finished draft — before it reaches a class.</div>
+        <div class="lib-prompt-box" id="tplAudit"></div>
+        <button class="copy-btn" onclick="copyBlock('tplAudit', this)">Copy prompt</button>
+      </div>
+
+      <div class="template-block">
+        <h3>Accuracy check</h3>
+        <div class="desc">For anything with numbers, formulas, dates, or scientific claims.</div>
+        <div class="lib-prompt-box" id="tplAccuracy"></div>
+        <button class="copy-btn" onclick="copyBlock('tplAccuracy', this)">Copy prompt</button>
+      </div>
+    </section>
+
+    <!-- GUARDRAILS -->
+    <section class="view" id="view-guardrails">
+      <div class="eyebrow">Before It Reaches a Class</div>
+      <h1 class="page-title">Guardrails &amp; final check</h1>
+      <p class="lede">AI drafts fast. Human judgment is still what makes a lesson safe, accurate, and right for your students.</p>
+
+      <div class="g-cols">
+        <div class="g-col">
+          <h3>Using AI responsibly</h3>
+          <ul class="g-list" id="guardList"></ul>
+        </div>
+        <div class="g-col">
+          <h3>Pre-flight checklist</h3>
+          <div class="checklist-progress">
+            <div class="bar"><div class="bar-fill" id="barFill"></div></div>
+            <div class="progress-label" id="progressLabel">0 / 15</div>
+          </div>
+          <ul class="qa-list" id="qaList"></ul>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+/* ---------------- NAV ---------------- */
+const views = [
+  {id:'home', label:'Overview'},
+  {id:'builder', label:'Prompt Builder'},
+  {id:'library', label:'Prompt Library'},
+  {id:'refine', label:'Refine & Fact-Check'},
+  {id:'guardrails', label:'Guardrails & Checklist'},
+];
+
+function renderNav(){
+  const rail = document.getElementById('railNav');
+  const mob = document.getElementById('mobileTabs');
+  rail.innerHTML=''; mob.innerHTML='';
+  views.forEach((v,i)=>{
+    const b = document.createElement('button');
+    b.className='rail-btn'; b.id='rail-'+v.id;
+    b.innerHTML = `<span class="num">${String(i+1).padStart(2,'0')}</span><span>${v.label}</span>`;
+    b.onclick=()=>showView(v.id);
+    rail.appendChild(b);
+
+    const m = document.createElement('button');
+    m.textContent=v.label; m.id='mob-'+v.id;
+    m.onclick=()=>showView(v.id);
+    mob.appendChild(m);
+  });
+}
+function showView(id){
+  document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
+  document.getElementById('view-'+id).classList.add('active');
+  document.querySelectorAll('.rail-btn').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.mobile-tabs button').forEach(el=>el.classList.remove('active'));
+  document.getElementById('rail-'+id).classList.add('active');
+  document.getElementById('mob-'+id).classList.add('active');
+  window.scrollTo(0,0);
+}
+renderNav();
+showView('home');
+
+/* ---------------- PROMPT BUILDER ---------------- */
+const modes = [
+  {id:'full', label:'Full lesson'},
+  {id:'slides', label:'Slides only'},
+  {id:'guide', label:'Teacher guide'},
+  {id:'review', label:'Check or audit existing work'},
+];
+let currentMode = 'full';
+
+const subjects = ['Science','Mathematics','English','Nepali','Social Studies','Computer Science','Health & Physical Education','Moral / Social Education','Environmental Science','Other'];
+const curricula = ['CDC Nepal (national curriculum)','NEB (Grade 11–12)','Cambridge IGCSE / A-Level','IB','Other / not sure'];
+const languages = ['Nepali medium','English medium','Mixed Nepali–English'];
+const tones = ['Encouraging & inquiry-driven','Rigorous & exam-focused','Playful & energetic'];
+
+const state = {
+  subject: 'Science', subjectOther:'',
+  grade: 7, topic:'', curriculum: curricula[0], curriculumOther:'',
+  duration: 40, classSize: 35, language: languages[0],
+  prior:'', outcomes:'', resourcesHave:'', resourcesLack:'', misconceptions:'',
+  tone: tones[0], extra:'',
+  sectionsFull: {seq:true, activity:true, questions:true, slides:true, guide:true, formative:true, diff:true, backup:true, checklist:true},
+  slideDirect: 4, slideLocal:true, slideGuided:true, slideIndependent:true,
+  pastedLesson:'', guideFocus:{prep:true, stage:true, struggle:true, early:true, backup:true, assess:true, reflect:true},
+  reviewText:'', reviewChecks:{align:true, audit:true, fact:true},
+};
+
+function esc(s){return (s||'').trim();}
+function gradeLabel(g){ return g<=0 ? 'Early grades' : 'Grade '+g; }
+
+function subjectLabel(){ return state.subject==='Other' ? (esc(state.subjectOther)||'[subject]') : state.subject; }
+function curriculumLabel(){ return state.curriculum.startsWith('Other') ? (esc(state.curriculumOther)||'[curriculum/board]') : state.curriculum; }
+
+function line(label, value){ return value ? `- ${label}: ${value}\n` : ''; }
+
+function buildContextBlock(){
+  let out = '';
+  out += `Subject: ${subjectLabel()}\n`;
+  out += `Grade / level: ${gradeLabel(state.grade)}\n`;
+  out += `Topic: ${esc(state.topic) || '[topic]'}\n`;
+  out += `Curriculum / board: ${curriculumLabel()}\n`;
+  out += `Class duration: ${state.duration} minutes\n`;
+  out += `Class size: ${state.classSize} students\n`;
+  out += `Language of instruction: ${state.language}\n`;
+  return out;
+}
+
+function buildFullPrompt(){
+  let p = `Act as an experienced classroom teacher and lesson designer helping me prepare a real lesson for a school in Nepal.\n\n`;
+  p += `CONTEXT\n${buildContextBlock()}`;
+  p += line('Prior knowledge', esc(state.prior));
+  p += line('Learning outcomes', esc(state.outcomes));
+  p += line('Resources available', esc(state.resourcesHave));
+  p += line('Resources NOT available', esc(state.resourcesLack));
+  p += line('Misconceptions to watch for', esc(state.misconceptions));
+  p += `Preferred tone: ${state.tone}\n`;
+
+  const s = state.sectionsFull;
+  const parts = [];
+  if(s.seq) parts.push('a short learning sequence with timings (start, elicit prior ideas, investigation, discussion, explanation, application, assessment, reflection)');
+  if(s.activity) parts.push('one practical activity using only the resources I listed as available');
+  if(s.questions) parts.push('teacher questions that reveal student thinking, not just recall');
+  if(s.slides) parts.push('a student-facing slide outline (title, max 5 bullets per slide, a note on what visual would help, and speaker notes)');
+  if(s.guide) parts.push('a short teacher guide: what to say, ask, demonstrate, and do if students struggle or finish early');
+  if(s.formative) parts.push('one formative check during the lesson and one exit ticket');
+  if(s.diff) parts.push('differentiation: one support strategy and one extension');
+  if(s.backup) parts.push('the most likely failure point and a backup plan for it');
+  if(s.checklist) parts.push('a final feasibility checklist (timing, materials, safety, language) before I teach it');
+
+  p += `\nCreate:\n`;
+  parts.forEach((x,i)=>{ p += `${i+1}. ${x}\n`; });
+
+  p += `\nRules:\n`;
+  p += `- Design for my actual classroom, not an ideal one.\n`;
+  p += `- Prefer students observing, predicting, measuring, modelling, explaining, or discussing over passive listening.\n`;
+  p += `- Do not invent facts, equipment, statistics, or curriculum requirements — mark anything I should verify.\n`;
+  p += `- Use locally relevant examples where they genuinely help understanding, not as decoration.\n`;
+  p += `- Ask me a question only if missing information would materially change the lesson; otherwise state a reasonable assumption and continue.\n`;
+  if(esc(state.extra)) p += `- ${esc(state.extra)}\n`;
+  p += `\nReturn the output in a format I can directly edit.`;
+  return p;
+}
+
+function buildSlidesPrompt(){
+  let p = `Act as a curriculum designer building a classroom slide deck for a teacher in Nepal.\n\n`;
+  p += `CONTEXT\n${buildContextBlock()}`;
+  p += line('Prior knowledge', esc(state.prior));
+  p += line('Learning outcomes', esc(state.outcomes));
+  p += `\nBuild a slide-by-slide outline (not a script):\n`;
+  p += `1. Hook / starter (1 slide) — a question, image idea, or local example\n`;
+  p += `2. Learning objectives (1 slide)\n`;
+  p += `3. Direct instruction (${state.slideDirect} slides) — one idea per slide\n`;
+  if(state.slideGuided) p += `4. Guided practice (1–2 slides) — a worked example\n`;
+  if(state.slideIndependent) p += `5. Independent practice (1 slide)\n`;
+  p += `6. Check for understanding (1 slide) — an exit question or quick quiz\n`;
+  p += `7. Summary / recap (1 slide)\n`;
+  p += `\nFor each slide give: title / bullets (max 5, max 8 words each) / a note on what visual would help / speaker notes (2–3 sentences of what to actually say).\n`;
+  p += `\nConstraints:\n`;
+  if(state.slideLocal) p += `- Use locally relevant examples where possible.\n`;
+  p += `- Keep language simple for ${gradeLabel(state.grade)} without oversimplifying the concept.\n`;
+  p += `- Do not write a generic textbook summary — make it specific to this class.\n`;
+  if(esc(state.extra)) p += `- ${esc(state.extra)}\n`;
+  return p;
+}
+
+function buildGuidePrompt(){
+  let p = `Turn the lesson plan below into a practical guide a teacher could actually teach from tomorrow.\n\n`;
+  p += `CONTEXT\n${buildContextBlock()}`;
+  const f = state.guideFocus;
+  p += `\nInclude:\n`;
+  if(f.prep) p += `A. Before class — preparation, materials, room setup, safety check\n`;
+  if(f.stage) p += `B. During class, stage by stage — purpose, what to do, questions to ask, likely student responses, when to move on\n`;
+  if(f.struggle) p += `C. If students struggle — specific moves and simpler representations\n`;
+  if(f.early) p += `D. If students finish early — meaningful extension tasks\n`;
+  if(f.backup) p += `E. If the activity fails — at least two alternative routes to the same outcome\n`;
+  if(f.assess) p += `F. Assessment — what evidence to collect; what strong / partial / weak looks like\n`;
+  if(f.reflect) p += `G. After class — what to check afterward: what was understood, what to change next time\n`;
+  p += `\nUse natural teacher language — avoid scripted, theatrical dialogue unless a short suggested phrase genuinely helps.\n`;
+  if(esc(state.extra)) p += `\nAdditional constraint: ${esc(state.extra)}\n`;
+  p += `\nLESSON PLAN:\n${esc(state.pastedLesson) || '[paste your approved lesson plan or outline here]'}`;
+  return p;
+}
+
+function buildReviewPrompt(){
+  let p = `Review the material below as a strict but constructive instructional coach for a Nepal classroom.\n\n`;
+  p += `CONTEXT\n${buildContextBlock()}`;
+  const c = state.reviewChecks;
+  const asks = [];
+  if(c.align) asks.push(`Curriculum alignment — which learning objectives for this subject, grade, and curriculum are covered, which are missing, and what to add to close the gap`);
+  if(c.audit) asks.push(`Instructional audit — check whether outcomes are observable, activities serve the outcomes, teacher talk is limited appropriately, timing is realistic, and assessment actually measures the outcome. Return 5 strongest elements and 5 highest-priority changes`);
+  if(c.fact) asks.push(`Accuracy check — verify every number, equation, unit, and factual claim. For each issue found: state the claim, classify it as accurate / inaccurate / incomplete / needs verification, and give a corrected version`);
+  p += `\nCheck this for:\n`;
+  asks.forEach((a,i)=>{ p+= `${i+1}. ${a}\n`; });
+  p += `\nDo not rewrite the whole thing — flag issues and suggested changes only. Do not manufacture citations or curriculum references you cannot verify — say clearly if something needs checking against an external source. Do not praise weak elements merely to be polite.\n`;
+  if(esc(state.extra)) p += `\nAdditional constraint: ${esc(state.extra)}\n`;
+  p += `\nMATERIAL TO REVIEW:\n${esc(state.reviewText) || '[paste the lesson, slides, or worksheet you want checked here]'}`;
+  return p;
+}
+
+function currentPromptText(){
+  if(currentMode==='full') return buildFullPrompt();
+  if(currentMode==='slides') return buildSlidesPrompt();
+  if(currentMode==='guide') return buildGuidePrompt();
+  if(currentMode==='review') return buildReviewPrompt();
+}
+
+function renderModeRow(){
+  const row = document.getElementById('modeRow');
+  row.innerHTML='';
+  modes.forEach(m=>{
+    const b=document.createElement('button');
+    b.className='mode-chip'+(m.id===currentMode?' active':'');
+    b.textContent=m.label;
+    b.onclick=()=>{ currentMode=m.id; renderModeRow(); renderForm(); updateOutput(); };
+    row.appendChild(b);
+  });
+}
+
+function fieldSelect(id,label,options,value,onchange){
+  return `<div class="field"><label for="${id}">${label}</label>
+    <select id="${id}">${options.map(o=>`<option ${o===value?'selected':''}>${o}</option>`).join('')}</select></div>`;
+}
+
+function renderForm(){
+  const f = document.getElementById('builderForm');
+  let html = '';
+
+  // Shared context (always)
+  html += `<div class="field-group"><div class="fg-title">Class context</div>`;
+  html += fieldSelect('f_subject','Subject',subjects,state.subject);
+  if(state.subject==='Other') html += `<div class="field"><input type="text" id="f_subjectOther" placeholder="Name the subject" value="${state.subjectOther}"></div>`;
+  html += `<div class="field slider-field"><div class="slider-head"><label>Grade / level</label><span class="val" id="v_grade">${gradeLabel(state.grade)}</span></div>
+    <input type="range" id="f_grade" min="1" max="12" value="${state.grade}"></div>`;
+  html += `<div class="field"><label for="f_topic">Topic</label><input type="text" id="f_topic" placeholder="e.g. Photosynthesis, Fractions, Nepal's federal structure" value="${state.topic}"></div>`;
+  html += fieldSelect('f_curriculum','Curriculum / board',curricula,state.curriculum);
+  if(state.curriculum.startsWith('Other')) html += `<div class="field"><input type="text" id="f_curriculumOther" placeholder="Name the curriculum" value="${state.curriculumOther}"></div>`;
+  html += `<div class="row2">
+    <div class="field slider-field"><div class="slider-head"><label>Duration</label><span class="val" id="v_duration">${state.duration} min</span></div><input type="range" id="f_duration" min="20" max="90" step="5" value="${state.duration}"></div>
+    <div class="field"><label for="f_classSize">Class size</label><input type="number" id="f_classSize" min="1" max="120" value="${state.classSize}"></div>
+  </div>`;
+  html += fieldSelect('f_language','Language of instruction',languages,state.language);
+  html += `</div>`;
+
+  if(currentMode==='full' || currentMode==='slides'){
+    html += `<div class="field-group"><div class="fg-title">What students already know</div>
+      <div class="field"><textarea id="f_prior" placeholder="What have students already covered or likely already understand?">${state.prior}</textarea></div>
+      <div class="field"><label for="f_outcomes">Learning outcomes (optional but recommended)</label><textarea id="f_outcomes" placeholder="By the end, students should be able to…">${state.outcomes}</textarea></div>
+    </div>`;
+  }
+
+  if(currentMode==='full'){
+    html += `<div class="field-group"><div class="fg-title">Resources</div>
+      <div class="field"><label for="f_resourcesHave">Available</label><input type="text" id="f_resourcesHave" placeholder="whiteboard, printed handouts, one shared phone…" value="${state.resourcesHave}"></div>
+      <div class="field"><label for="f_resourcesLack">Not available</label><input type="text" id="f_resourcesLack" placeholder="projector, lab equipment, internet…" value="${state.resourcesLack}"></div>
+      <div class="field"><label for="f_misconceptions">Common misconceptions to address</label><textarea id="f_misconceptions" placeholder="Optional">${state.misconceptions}</textarea></div>
+    </div>`;
+    html += `<div class="field-group"><div class="fg-title">Tone</div>${fieldSelect('f_tone','',tones,state.tone)}</div>`;
+    html += `<div class="field-group"><div class="fg-title">Include in the output</div><div class="check-list">`;
+    const labels = {seq:'Learning sequence with timings', activity:'One practical activity', questions:'Teacher questions revealing student thinking', slides:'Student-facing slide outline', guide:'Short teacher guide', formative:'Formative check + exit ticket', diff:'Differentiation (support + extension)', backup:'Likely failure point + backup plan', checklist:'Feasibility checklist'};
+    Object.keys(labels).forEach(k=>{
+      html += `<label><input type="checkbox" data-sec="${k}" ${state.sectionsFull[k]?'checked':''}> ${labels[k]}</label>`;
+    });
+    html += `</div></div>`;
+  }
+
+  if(currentMode==='slides'){
+    html += `<div class="field-group"><div class="fg-title">Slide shape</div>
+      <div class="field slider-field"><div class="slider-head"><label>Direct instruction slides</label><span class="val" id="v_slideDirect">${state.slideDirect}</span></div><input type="range" id="f_slideDirect" min="2" max="6" value="${state.slideDirect}"></div>
+      <div class="check-list">
+        <label><input type="checkbox" id="f_slideGuided" ${state.slideGuided?'checked':''}> Include a guided-practice slide</label>
+        <label><input type="checkbox" id="f_slideIndependent" ${state.slideIndependent?'checked':''}> Include an independent-practice slide</label>
+        <label><input type="checkbox" id="f_slideLocal" ${state.slideLocal?'checked':''}> Use locally relevant examples</label>
+      </div>
+    </div>`;
+  }
+
+  if(currentMode==='guide'){
+    html += `<div class="field-group"><div class="fg-title">Your approved lesson</div>
+      <div class="field"><textarea id="f_pastedLesson" style="min-height:130px" placeholder="Paste your lesson plan or outline here">${state.pastedLesson}</textarea></div>
+    </div>`;
+    html += `<div class="field-group"><div class="fg-title">Focus areas</div><div class="check-list">`;
+    const gl = {prep:'Before-class preparation', stage:'Stage-by-stage script', struggle:'If students struggle', early:'If students finish early', backup:'If the activity fails', assess:'Assessment guidance', reflect:'After-class reflection'};
+    Object.keys(gl).forEach(k=>{
+      html += `<label><input type="checkbox" data-gf="${k}" ${state.guideFocus[k]?'checked':''}> ${gl[k]}</label>`;
+    });
+    html += `</div></div>`;
+  }
+
+  if(currentMode==='review'){
+    html += `<div class="field-group"><div class="fg-title">What to review</div>
+      <div class="field"><textarea id="f_reviewText" style="min-height:130px" placeholder="Paste the lesson, slide text, or worksheet you want checked">${state.reviewText}</textarea></div>
+    </div>`;
+    html += `<div class="field-group"><div class="fg-title">Check for</div><div class="check-list">`;
+    const rl = {align:'Curriculum alignment gaps', audit:'Full instructional audit', fact:'Factual / numerical accuracy'};
+    Object.keys(rl).forEach(k=>{
+      html += `<label><input type="checkbox" data-rc="${k}" ${state.reviewChecks[k]?'checked':''}> ${rl[k]}</label>`;
+    });
+    html += `</div></div>`;
+  }
+
+  html += `<div class="field-group"><div class="fg-title">Anything else to add</div>
+    <div class="field"><textarea id="f_extra" placeholder="Optional — any extra constraint specific to your class">${state.extra}</textarea></div>
+  </div>`;
+
+  f.innerHTML = html;
+  attachFormEvents();
+}
+
+function attachFormEvents(){
+  const bind = (id, key, transform)=>{
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.addEventListener('input', ()=>{
+      state[key] = transform ? transform(el.value) : el.value;
+      if(id==='f_grade') document.getElementById('v_grade').textContent = gradeLabel(state.grade*1);
+      if(id==='f_duration') document.getElementById('v_duration').textContent = state.duration+' min';
+      if(id==='f_slideDirect') document.getElementById('v_slideDirect').textContent = state.slideDirect;
+      if(id==='f_subject' || id==='f_curriculum') renderForm();
+      updateOutput();
+    });
+  };
+  bind('f_subject','subject'); bind('f_subjectOther','subjectOther');
+  bind('f_grade','grade',Number); bind('f_topic','topic');
+  bind('f_curriculum','curriculum'); bind('f_curriculumOther','curriculumOther');
+  bind('f_duration','duration',Number); bind('f_classSize','classSize',Number);
+  bind('f_language','language'); bind('f_prior','prior'); bind('f_outcomes','outcomes');
+  bind('f_resourcesHave','resourcesHave'); bind('f_resourcesLack','resourcesLack');
+  bind('f_misconceptions','misconceptions'); bind('f_tone','tone');
+  bind('f_slideDirect','slideDirect',Number);
+  bind('f_pastedLesson','pastedLesson'); bind('f_reviewText','reviewText');
+  bind('f_extra','extra');
+
+  const boolBind = (id,key)=>{
+    const el = document.getElementById(id); if(!el) return;
+    el.addEventListener('change',()=>{ state[key]=el.checked; updateOutput(); });
+  };
+  boolBind('f_slideGuided','slideGuided'); boolBind('f_slideIndependent','slideIndependent'); boolBind('f_slideLocal','slideLocal');
+
+  document.querySelectorAll('[data-sec]').forEach(el=>{
+    el.addEventListener('change',()=>{ state.sectionsFull[el.dataset.sec]=el.checked; updateOutput(); });
+  });
+  document.querySelectorAll('[data-gf]').forEach(el=>{
+    el.addEventListener('change',()=>{ state.guideFocus[el.dataset.gf]=el.checked; updateOutput(); });
+  });
+  document.querySelectorAll('[data-rc]').forEach(el=>{
+    el.addEventListener('change',()=>{ state.reviewChecks[el.dataset.rc]=el.checked; updateOutput(); });
+  });
+}
+
+function updateOutput(){
+  document.getElementById('promptOutput').textContent = currentPromptText();
+  const labels = {full:'Full lesson prompt', slides:'Slide deck prompt', guide:'Teacher guide prompt', review:'Review prompt'};
+  document.getElementById('outLabel').textContent = labels[currentMode];
+}
+
+function copyPrompt(){
+  const text = currentPromptText();
+  navigator.clipboard.writeText(text).then(()=>{
+    const b = document.getElementById('copyBtn');
+    const orig = b.textContent;
+    b.textContent = 'Copied'; b.classList.add('copied');
+    setTimeout(()=>{ b.textContent=orig; b.classList.remove('copied'); }, 1600);
+  });
+}
+
+renderModeRow();
+renderForm();
+updateOutput();
+
+/* ---------------- LIBRARY ---------------- */
+const library = [
+  {cat:'Lesson Design', title:'Lesson architecture', desc:'The learning journey, before you ask for a single slide.',
+   prompt:`Act as an experienced classroom lesson designer.\n\nI will give you a topic and teaching context. Do NOT make slides yet.\n\nBuild the lesson as a learning journey:\nSTART → ELICIT PRIOR IDEAS → EXPERIENCE/INVESTIGATION → DISCUSSION → EXPLANATION → APPLICATION → ASSESSMENT → REFLECTION\n\nFor each stage give: approximate time / teacher action / student action / key question / expected evidence of learning / possible misconception / transition to the next stage.\n\nReduce teacher talk wherever student observation, prediction, measurement, discussion, drawing, modelling, or explanation can do the work instead.\n\nAt the end, identify the 3 most important decisions I must make while teaching.\n\nContext: Grade [ ] · Subject [ ] · Topic [ ] · Duration [ ] · Curriculum [ ] · Prior knowledge [ ] · Available resources [ ]`},
+  {cat:'Lesson Design', title:'Complete lesson package', desc:'A one-pass option for a quick turnaround.',
+   prompt:`Using the teaching context below, create a complete lesson package with these sections, in this order: title · one-sentence purpose · learning outcomes as observable actions · prior knowledge · key vocabulary · materials · safety · timed lesson sequence · teacher actions · student actions · checking questions · main activity · differentiation (support + extension) · formative assessment · exit ticket · likely misconceptions · what could go wrong + alternatives · homework only if it genuinely supports the outcome · student-facing slide outline · teacher guide.\n\nDesign around student thinking and evidence of learning, not entertainment. Do not fabricate curriculum references — ask for the document or label any alignment as provisional.\n\nContext: Grade [ ] · Subject [ ] · Topic [ ] · Duration [ ] · Curriculum [ ] · Prior knowledge [ ] · Available resources [ ]`},
+  {cat:'Lesson Design', title:'Curriculum gap check', desc:'Check a draft against your curriculum rather than rewrite it.',
+   prompt:`Here is a slide/lesson outline I've drafted [or paste it]. Check it against [curriculum/board] learning objectives for [subject, grade, unit].\n\nTell me: 1) which objectives are covered 2) which are missing 3) suggested additions to close the gap.\n\nDo not rewrite the whole thing — just flag gaps and suggest additions.`},
+
+  {cat:'Slides', title:'Full lesson deck', desc:'A complete slide-by-slide outline with speaker notes.',
+   prompt:`Act as a curriculum designer helping a [subject] teacher build a slide deck for [grade level] students following [curriculum]. Topic: [topic]. Prior knowledge: [ ]. Duration: [ ]. Learning objectives: [ ].\n\nBuild a slide-by-slide outline (not a script):\n1. Hook/starter (1 slide)\n2. Learning objectives (1 slide)\n3. Direct instruction (3–5 slides) — one idea per slide\n4. Guided practice (1–2 slides)\n5. Independent practice (1 slide)\n6. Check for understanding (1 slide)\n7. Summary/recap (1 slide)\n\nFor each slide give: title / bullets (max 5, max 8 words each) / a note on what visual would help / speaker notes (2–3 sentences).\n\nUse locally relevant examples where possible; keep language simple for [grade level] without oversimplifying. Do not write a generic textbook summary.`},
+  {cat:'Slides', title:'Micro-lesson (10–15 min)', desc:'A tight six-slide explainer for a single concept.',
+   prompt:`Create a 5–6 slide mini-lesson explaining [single concept] to [grade level] students seeing it for the first time.\n\nSlide 1: real-world hook question\nSlide 2: definition + one example\nSlide 3: worked example, step by step\nSlide 4: a common misconception and why it's wrong\nSlide 5: practice question (no answer shown)\nSlide 6: one-sentence takeaway\n\nKeep total word count under 150 across all slides. Prioritize clarity over completeness.`},
+  {cat:'Slides', title:'Notes → slides', desc:'Convert existing notes or a worksheet into a slide outline.',
+   prompt:`Below is a lesson worksheet/notes I've already written. Convert it into a slide deck outline for [grade level] [subject] students.\n\nRules: one idea per slide — split dense paragraphs; convert full sentences into bullet fragments (max 8 words); preserve every formula, definition, and example — do not drop content; flag anywhere a diagram would communicate faster than text; add full-explanation speaker notes under each slide.\n\n[PASTE WORKSHEET / NOTES HERE]`},
+
+  {cat:'Teacher Guides', title:'Teacher facilitation guide', desc:'A stage-by-stage guide for teaching a lesson tomorrow.',
+   prompt:`Turn the approved lesson plan into a practical guide for a teacher who will actually teach it tomorrow.\n\nA. Before class — preparation, materials, room setup, board prep, safety check\nB. During class, stage by stage — purpose / what to do / suggested wording / questions to ask / likely student responses / how to probe deeper / when to move on / what to put on the board\nC. If students struggle — specific moves, simpler representations, examples\nD. If students finish early — meaningful extension tasks\nE. If the activity fails — at least two alternative routes to the same outcome\nF. Assessment — what evidence to collect; what counts as strong/partial/weak\nG. After class — reflection: what was understood, what misconception showed up, what to change next time\n\nUse natural teacher language — avoid scripted, theatrical dialogue.\n\n[PASTE APPROVED LESSON PLAN]`},
+  {cat:'Teacher Guides', title:'Lab / hands-on activity guide', desc:'A safety-checked, cost-aware procedure for a practical activity.',
+   prompt:`Write a teacher guide for a hands-on [subject] activity on [topic], for [grade level], class size [X], [lab/classroom] setting.\n\nInclude: safety notes / full materials list with approximate cost, locally sourceable / teacher setup steps (before class) / student-facing steps / expected results — what success looks like / 3 common problems and fixes / a short reflection question for afterward.\n\nFormat as numbered steps, not paragraphs.`},
+  {cat:'Teacher Guides', title:'Substitute lesson script', desc:'A script simple enough for a teacher with zero background in the subject.',
+   prompt:`Write a lesson guide simple enough for a substitute with zero background in [subject] to run confidently. Topic: [topic], [grade level], [duration].\n\nAssume zero subject expertise — write it as a script: exact things to say, exact questions to ask, and what to do if students finish early or get stuck. No jargon.`},
+  {cat:'Teacher Guides', title:'Answer / marking guide', desc:'Worked solutions with partial-credit reasoning, not just final answers.',
+   prompt:`Here is a worksheet/problem set: [paste it]. Write a marking guide including: full worked solutions / partial-credit breakdown (what earns how many marks) / common student errors per question and what each indicates about the misunderstanding / a 1–2 sentence note on what to say if the answer is wrong.`},
+
+  {cat:'Activities', title:'Low-resource activity designer', desc:'Activities built around what you actually have, not an ideal classroom.',
+   prompt:`Design [number] classroom activities for [topic], Grade [ ].\n\nConstraints: available materials [ ] / unavailable [ ] / max time [ ] minutes / class size [ ] / space [ ] / budget [ ] / safety constraints [ ].\n\nFor each: learning purpose / materials / preparation / student instructions / teacher role / a prediction question before starting / what to observe or measure / expected result / explanation / questions linking observation to concept / common failure points / a backup version with even fewer resources / safety note.\n\nPrioritise activities where students manipulate, observe, predict, measure, model, compare, explain, or design.`},
+  {cat:'Activities', title:'Predict–observe–explain demo', desc:'A three-phase science demonstration structure.',
+   prompt:`Design a short science demonstration for [topic] in three phases:\nBEFORE — students predict and justify.\nDURING — students observe a specific phenomenon and record evidence.\nAFTER — students explain the observation using the target concept.\n\nGive: setup / materials / procedure / safety / what should happen / why / what could make it fail / questions moving observation to explanation / one misconception to listen for / one variation students could investigate.`},
+  {cat:'Activities', title:'Inquiry sequence', desc:'Turn a topic into a phenomenon-first inquiry lesson.',
+   prompt:`Turn this topic into a classroom inquiry. Topic [ ] / Grade [ ] / Time [ ].\n\nSequence: Phenomenon → Notice → Wonder → Question → Prediction → Plan → Evidence → Interpretation → Explanation → New question.\n\nDo not give the conclusion at the start. For each stage, give teacher prompts and student actions, and confirm the investigation can actually produce evidence relevant to the question — redesign it if it can't.`},
+  {cat:'Activities', title:'Design challenge (makerspace)', desc:'A 45–90 minute engineering-design task tied to a real concept.',
+   prompt:`Design a 45–90 minute makerspace challenge connected to [science concept].\n\nStudents: understand the problem → identify constraints → generate ideas → first design → build/prototype → test → collect evidence → improve → explain the science behind their decisions.\n\nGive: driving problem / outcomes / materials / constraints / safety / teacher setup / student brief / success criteria / testing method / iteration prompts / reflection questions / rubric.\n\nAvoid a craft activity — design decisions must require applying the concept.`},
+  {cat:'Activities', title:'Engagement structure', desc:'Quick discussion, jigsaw, debate, or station-rotation formats.',
+   prompt:`Build a classroom engagement structure for [topic], Grade [ ]. Choose one:\n\n- Think-Pair-Share: 3 discussion questions at Analyze/Evaluate level, plus 3-minute turn-and-talk starters.\n- Inquiry/Mystery: a 20-minute scenario where students analyze 4 evidence cards to discover the rule before explanation.\n- Jigsaw: divide the topic into 4 sub-topics with expert-group task cards and guiding questions.\n- Socratic debate: structured debate with 3 arguments each for two sides, plus a referee rubric.\n- Station rotation: 4 stations (10 min each) — visual/diagram, data analysis, vocabulary, teacher-led review.`},
+
+  {cat:'Assessment', title:'Student worksheet', desc:'A worksheet built around reasoning, not recall.',
+   prompt:`Create a 1–2 page student worksheet for this lesson. Include: name/date/class / learning target in student-friendly language / prior-knowledge question / prediction / observation-data table if needed / 3–5 thinking questions / one application question / one drawing-model-explanation task / exit ticket.\n\nQuestions must require using evidence, reasoning, comparison, or application — not textbook recall. Provide a separate answer key with expected reasoning, not just final answers.\n\n[PASTE LESSON]`},
+  {cat:'Assessment', title:'Formative assessment designer', desc:'Diagnostic, hinge, and exit-ticket checks tied to one outcome.',
+   prompt:`For this outcome, create a progression of formative checks: one diagnostic question before teaching / two hinge questions during teaching / one short application task / one exit ticket.\n\nFor each: what a correct response demonstrates / common incorrect responses / the likely misconception behind each / the teacher's next move.\n\nKeep questions quick enough for a real class.\n\nLearning outcome: [ ]`},
+  {cat:'Assessment', title:'Misconception mapper', desc:'Surface the likely wrong ideas before they show up mid-lesson.',
+   prompt:`For Grade [ ] students learning [topic], identify the most likely conceptual misunderstandings. For each: the incorrect idea a student might express / why it's plausible to a learner / an observation, model, or counterexample that helps students examine it / a teacher prompt encouraging revision / a quick check question.\n\nDistinguish well-established misconceptions from reasonable predictions — do not invent classroom evidence.`},
+  {cat:'Assessment', title:'Question ladder', desc:'Questions moving from surface recall to deep reasoning.',
+   prompt:`Create teacher questions for [topic] moving through: Notice → Describe → Predict → Explain → Evidence → Compare → Apply → Challenge → Reflect.\n\nGive 2–3 questions per level, suitable for Grade [ ]. Avoid questions whose answer is simply the definition of the concept.`},
+
+  {cat:'Differentiation', title:'Mixed-ability adapter', desc:'Vary support and representation, not just difficulty.',
+   prompt:`Adapt this lesson for a mixed-ability class while keeping the central outcome constant. Provide: scaffolds for students needing support / alternative representations (diagram, model, sentence starter, partial table) / vocabulary support / guided questions / independent version / extension for advanced students / grouping suggestions / when to remove scaffolds.\n\nDo not simply give weaker students easier content — vary support, representation, or independence instead.`},
+  {cat:'Differentiation', title:'Local context adapter', desc:'Adjust materials, examples, and feasibility for your setting.',
+   prompt:`Adapt this lesson for [urban/rural/semi-urban] Nepal. Context: Grade [ ] / school resources [ ] / class size [ ] / language of instruction [ ] / commonly available materials [ ].\n\nReview for: realistic materials / local examples / cultural relevance / language accessibility / cost / electricity-internet dependence / space / safety / equipment the activity wrongly assumes exists.\n\nUse local context only where it improves understanding or feasibility — not as decoration. Keep scientific concepts accurate.`},
+  {cat:'Differentiation', title:'Three-condition adaptation', desc:'The same outcome, built for three different resource levels.',
+   prompt:`Adapt this same lesson for three conditions, learning outcome unchanged:\n1) well-equipped classroom\n2) ordinary classroom, limited materials\n3) very low-resource / no-lab classroom.\n\nFor each: materials / setup / activity / teacher moves / assessment / what learning evidence should stay the same.\n\nThe low-resource version should not default to a lecture — look for ways to preserve observation, modelling, prediction, discussion, or measurement.`},
+
+  {cat:'Visual & Board', title:'Board plan', desc:'What goes on the board, and when, to make thinking visible.',
+   prompt:`Create a board plan for this lesson: what goes on the board before students enter / during the opening / during the investigation / during explanation / at the end.\n\nUse the board to make student thinking visible — include only what helps students reason, organize evidence, or retain the core concept. State when each element is added and why.`},
+  {cat:'Visual & Board', title:'Visual brief', desc:'Identify exactly which visuals are worth the effort, and what they must show.',
+   prompt:`Identify the visuals that would genuinely improve understanding in this lesson. For each: slide/activity location / purpose / type (photo, labelled diagram, sequence, graph, model, map, icon set) / exact content that must appear / labels / what must NOT be shown to avoid confusion / age-appropriate style.\n\nFavour clear structure over decoration, especially for diagrams.`},
+];
+
+const libCats = ['All', ...Array.from(new Set(library.map(x=>x.cat)))];
+let activeLibCat = 'All';
+
+function renderLibFilters(){
+  const wrap = document.getElementById('libFilters');
+  wrap.innerHTML='';
+  libCats.forEach(c=>{
+    const b = document.createElement('button');
+    b.className='mode-chip'+(c===activeLibCat?' active':'');
+    b.textContent=c;
+    b.onclick=()=>{ activeLibCat=c; renderLibFilters(); renderLibrary(); };
+    wrap.appendChild(b);
+  });
+}
+
+function renderLibrary(){
+  const grid = document.getElementById('libGrid');
+  const q = (document.getElementById('libSearch').value||'').toLowerCase();
+  grid.innerHTML='';
+  library
+    .filter(item => activeLibCat==='All' || item.cat===activeLibCat)
+    .filter(item => !q || (item.title+item.desc+item.cat).toLowerCase().includes(q))
+    .forEach((item, idx)=>{
+      const wrap = document.createElement('div');
+      wrap.className='lib-item';
+      const boxId = 'libbox-'+idx+'-'+item.title.replace(/\s+/g,'');
+      wrap.innerHTML = `
+        <div class="lib-item-head">
+          <div>
+            <div class="lib-item-cat">${item.cat}</div>
+            <div class="lib-item-title">${item.title}</div>
+            <div class="lib-item-desc">${item.desc}</div>
+          </div>
+          <div class="lib-chevron">⌄</div>
+        </div>
+        <div class="lib-item-body">
+          <div class="lib-prompt-box" id="${boxId}">${item.prompt}</div>
+          <button class="copy-btn" data-target="${boxId}">Copy prompt</button>
+        </div>`;
+      wrap.querySelector('.lib-item-head').onclick = ()=> wrap.classList.toggle('open');
+      wrap.querySelector('.copy-btn').onclick = (e)=>{
+        e.stopPropagation();
+        navigator.clipboard.writeText(item.prompt).then(()=>{
+          const b = e.target;
+          const orig = b.textContent;
+          b.textContent='Copied'; b.classList.add('copied');
+          setTimeout(()=>{ b.textContent=orig; b.classList.remove('copied'); }, 1500);
+        });
+      };
+      grid.appendChild(wrap);
+    });
+}
+renderLibFilters();
+renderLibrary();
+
+/* ---------------- REFINE TEMPLATES ---------------- */
+document.getElementById('tplRevision').textContent =
+`Revise only the parts identified below. Keep everything else unchanged.
+
+Problems: 1. [ ] 2. [ ] 3. [ ]
+Revision requirements: [ ] / [ ] / [ ]
+
+Do not add new activities unless required to solve one of these problems.
+Show only the changed sections and a one-sentence reason for each change.`;
+
+document.getElementById('tplAudit').textContent =
+`Audit the lesson below as a strict but constructive instructional coach.
+
+Check whether: outcomes are observable / each activity serves an outcome / there's enough student thinking and doing / teacher talk is appropriately limited / instructions are executable / timing is realistic / materials are realistic / safety is addressed / misconceptions are anticipated / assessment actually measures the outcomes / differentiation is practical / slides are readable / any claim is scientifically uncertain.
+
+Return: 5 strongest elements / 5 highest-priority changes / exact changes recommended / a revised sequence after applying them. Do not praise weak elements merely to be polite.
+
+[PASTE LESSON]`;
+
+document.getElementById('tplAccuracy').textContent =
+`Review the following material for factual accuracy — especially scientific definitions, cause-and-effect claims, numbers, equations, units, diagrams and labels, procedures, safety claims, historical claims, and citations.
+
+For every issue: identify the claim / classify it as accurate, inaccurate, incomplete, ambiguous, or needs verification / explain briefly / give a corrected version / state whether I should verify it against an external source. Do not manufacture citations — say clearly if you cannot verify a claim.
+
+[PASTE MATERIAL]`;
+
+function copyBlock(id, btn){
+  const text = document.getElementById(id).textContent;
+  navigator.clipboard.writeText(text).then(()=>{
+    const orig = btn.textContent;
+    btn.textContent='Copied'; btn.classList.add('copied');
+    setTimeout(()=>{ btn.textContent=orig; btn.classList.remove('copied'); }, 1500);
+  });
+}
+
+/* ---------------- GUARDRAILS ---------------- */
+const guardrails = [
+  'Fact-check anything with numbers, dates, formulas, or scientific claims before it reaches students.',
+  'Ask for sources on anything historical or statistical: where does this claim or date come from?',
+  "Don't paste student data — names, grades, personal details — unless school policy explicitly allows it.",
+  "Don't ask AI to invent references, quotations, curriculum requirements, or experimental results.",
+  'For high-stakes assessment, review every question, marking criterion, and answer key yourself.',
+  'When AI gives a scientific explanation, check whether it is simplified or actually wrong.',
+  'For anything involving chemicals, electricity, heat, tools, or fieldwork, run a separate safety review.',
+  'Treat the first draft as a draft — your subject expertise makes it actually good.',
+];
+const gList = document.getElementById('guardList');
+guardrails.forEach(g=>{ const li=document.createElement('li'); li.textContent=g; gList.appendChild(li); });
+
+const qaItems = [
+  'Learning outcomes describe what students will do, explain, model, calculate, or demonstrate.',
+  'Each major activity has a clear relationship to the learning outcome.',
+  'Students have a genuine reason to think or make a decision.',
+  'The teacher knows exactly what evidence to look for.',
+  'Time estimates fit the real class period.',
+  'Required materials are genuinely available.',
+  'Any experiment or demonstration has been checked for safety.',
+  'Scientific and mathematical claims have been verified.',
+  'Slides contain only what students need to see.',
+  'Teacher notes contain guidance actually usable mid-lesson.',
+  'Assessment matches the learning outcome.',
+  'The lesson responds to likely misconceptions.',
+  "There's a realistic fallback if technology or equipment fails.",
+  'Language is appropriate for the students.',
+  'You can explain, in one sentence, why each major activity is there.',
+];
+const qaList = document.getElementById('qaList');
+qaItems.forEach((t,i)=>{
+  const li = document.createElement('li');
+  li.innerHTML = `<label><input type="checkbox" onchange="updateProgress()"><span>${t}</span></label>`;
+  qaList.appendChild(li);
+});
+function updateProgress(){
+  const boxes = qaList.querySelectorAll('input[type=checkbox]');
+  const checked = Array.from(boxes).filter(b=>b.checked).length;
+  document.getElementById('barFill').style.width = (checked/boxes.length*100)+'%';
+  document.getElementById('progressLabel').textContent = checked+' / '+boxes.length;
+}
+</script>
+</body>
+</html>
